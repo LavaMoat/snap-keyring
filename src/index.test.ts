@@ -3,7 +3,7 @@ import SnapKeyring, { SnapKey } from ".";
 const mockSnapId = "local:http://localhost:8080";
 const mockSnapOrigin = "localhost:8080";
 const mockSnapKey = [mockSnapId, mockSnapOrigin] as SnapKey;
-const missingSnapKey = ['local:http://mock.test', 'mock.test'] as SnapKey;
+const missingSnapKey = ["local:http://mock.test", "mock.test"] as SnapKey;
 const mockAddress = "0x77ac616693b24c0c49cb148dbcb3fac8ccf0c96c";
 const mockPrivateData = {
   mockPrivateData: "foo",
@@ -11,7 +11,8 @@ const mockPrivateData = {
 
 const mockWallets = {
   "local:http://localhost:8080 localhost:8080": {
-    deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef: mockPrivateData,
+    deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef:
+      mockPrivateData,
   },
 };
 
@@ -23,10 +24,10 @@ test("Should manage wallets", async () => {
   expect(serialized).toEqual(mockWallets);
 
   const noAccounts = keyring.getAccounts(missingSnapKey);
-  expect(noAccounts).toEqual([])
+  expect(noAccounts).toEqual([]);
 
   const accounts = keyring.getAccounts(mockSnapKey);
-  expect(accounts).toEqual([mockAddress])
+  expect(accounts).toEqual([mockAddress]);
 
   const privateData = keyring.exportAccount(mockSnapKey, mockAddress);
   expect(privateData).toEqual(mockPrivateData);
@@ -38,7 +39,7 @@ test("Should manage wallets", async () => {
   expect(removed).toEqual(true);
 
   const emptyAccounts = keyring.getAccounts(mockSnapKey);
-  expect(emptyAccounts).toEqual([])
+  expect(emptyAccounts).toEqual([]);
 
   const removedEmpty = keyring.removeAccount(mockSnapKey, mockAddress);
   expect(removedEmpty).toEqual(false);
@@ -54,5 +55,4 @@ test("Should manage wallets", async () => {
   } catch (e) {
     expect(e.message).toMatch("TODO");
   }
-
 });
