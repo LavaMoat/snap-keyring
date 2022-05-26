@@ -1,8 +1,8 @@
 /**
  *  Keyring that stores private data partitioned by snap.
  *
- *  Each account requires a 64 byte public key and some arbitrary private
- *  data that must be serializable to JSON.
+ *  Each account requires a public key (64 byte or 33 byte SEC-1 encoded)
+ *  and some arbitrary private data that must be serializable to JSON.
  *
  *  Consumers of the API use an Ethereum address to reference accounts.
  */
@@ -15,7 +15,7 @@ export const type = "Snap Keyring";
 export type Address = string;
 export type SnapId = string;
 export type Origin = string;
-export type PublicKey = Buffer; // 32 byte public key
+export type PublicKey = Buffer; // 33 or 64 byte public key
 export type SnapKey = [SnapId, Origin];
 export type SnapWallet = Map<PublicKey, Json>;
 // We have to store the `SnapKey` as a string otherwise
