@@ -1,5 +1,5 @@
 /**
- *  Keyring that stores private data partitioned by snap.
+ *  Keyring that stores arbitrary JSON private data.
  *
  *  Each account requires a public key (64 byte or 33 byte SEC-1 encoded)
  *  and some arbitrary private data that must be serializable to JSON.
@@ -10,39 +10,27 @@ import { Json } from "@metamask/utils";
 import { publicToAddress, stripHexPrefix } from "ethereumjs-util";
 import { normalize } from "@metamask/eth-sig-util";
 
-export const type = "Snap Keyring";
+export const type = "Json Keyring";
 
 export type Address = string;
-export type SnapId = string;
-export type Origin = string;
 export type PublicKey = Buffer; // 33 or 64 byte public key
-export type SnapKey = [SnapId, Origin];
-export type SnapWallet = Map<PublicKey, Json>;
-// We have to store the `SnapKey` as a string otherwise
-// Map operations will fail due to Array equality.
-export type SnapWallets = Map<string, SnapWallet>;
+export type JsonWallet = [PublicKey, Json];
 
 // Serialized format.
 //
 // The key tuple is joined separated by a single space and the
 // public key for each account is encoded as a hex string.
-type JsonWallets = {
-  [key: string]: Json;
-};
+type JsonWallets = [string, Json][];
 
-class SnapKeyring {
+class JsonKeyring {
   static type: string;
 
   type: string;
-  #wallets: SnapWallets;
+  #wallets: JsonWallet[];
 
   constructor() {
     this.type = type;
-    this.#wallets = new Map();
-  }
-
-  #serializeKey(key: SnapKey): string {
-    return `${key[0]} ${key[1]}`;
+    this.#wallets = [];
   }
 
   #publicKeyToAddress(publicKey: PublicKey): Address {
@@ -57,18 +45,10 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async serialize(): Promise<JsonWallets> {
-    const toPublicKeyHex = (wallet: SnapWallet): Json => {
-      const result: Json = {};
-      for (const [key, value] of wallet.entries()) {
-        result[key.toString("hex")] = value;
-      }
-      return result;
-    };
-    const result: JsonWallets = {};
-    for (const [key, value] of this.#wallets.entries()) {
-      result[key] = toPublicKeyHex(value);
-    }
-    return result;
+    return this.#wallets.map((wallet: JsonWallet) => {
+      const [publicKey, privateValue] = wallet;
+      return [publicKey.toString("hex"), privateValue];
+    });
   }
 
   /**
@@ -78,36 +58,20 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async deserialize(wallets: JsonWallets): Promise<void> {
-    const fromPublicKeyHex = (
-      dict: { [key: string]: Json },
-      wallet: SnapWallet
-    ) => {
-      for (const key in dict) {
-        const privateData: Json = dict[key];
-        const publicKey = Buffer.from(key, "hex");
-        wallet.set(publicKey, privateData);
-      }
-    };
-
-    for (const key in wallets) {
-      const value = wallets[key] as { [key: string]: Json };
-      const snapWallet: SnapWallet = new Map();
-      fromPublicKeyHex(value, snapWallet);
-      this.#wallets.set(key, snapWallet);
-    }
+    this.#wallets = wallets.map((value: [string, Json]) => {
+      const [publicKey, privateValue] = value;
+      return [Buffer.from(publicKey, "hex"), privateValue];
+    });
   }
 
   /**
-   *  Get an array of addresses in the given wallet for a snap.
+   *  Get an array of addresses.
    */
-  getAccounts(key: SnapKey): Address[] {
-    const wallet = this.#wallets.get(this.#serializeKey(key));
-    if (wallet) {
-      return Array.from(wallet.keys()).map((key: PublicKey) => {
-        return this.#publicKeyToAddress(key);
-      });
-    }
-    return [];
+  getAccounts(): Address[] {
+    return this.#wallets.map((wallet: JsonWallet) => {
+      const [publicKey] = wallet;
+      return this.#publicKeyToAddress(publicKey);
+    });
   }
 
   /**
@@ -127,41 +91,32 @@ class SnapKeyring {
   }
 
   /**
-   *  Gets the private data associated with the public key for a snap.
+   *  Gets the private data associated with the public key.
    */
-  exportAccount(key: SnapKey, address: Address): Json {
+  exportAccount(address: Address): [PublicKey, Json] | undefined {
     const normalizedAddress = stripHexPrefix(address);
-    const wallet = this.#wallets.get(this.#serializeKey(key));
-    if (wallet) {
-      for (const [key, value] of wallet.entries()) {
-        const walletAddress = stripHexPrefix(this.#publicKeyToAddress(key));
-        if (walletAddress === normalizedAddress) {
-          return value;
-        }
-      }
-    }
-    return null;
+    return this.#wallets.find((wallet: JsonWallet) => {
+      const [publicKey] = wallet;
+      const walletAddress = stripHexPrefix(this.#publicKeyToAddress(publicKey));
+      return normalizedAddress === walletAddress;
+    });
   }
 
   /**
-   *  Remove an account for the given snap and public address.
+   *  Remove an account for the given public address.
    */
-  removeAccount(key: SnapKey, address: Address): boolean {
+  removeAccount(address: Address): boolean {
     const normalizedAddress = stripHexPrefix(address);
-    const wallet = this.#wallets.get(this.#serializeKey(key));
-    if (wallet) {
-      for (const key of wallet.keys()) {
-        const walletAddress = stripHexPrefix(this.#publicKeyToAddress(key));
-        if (walletAddress === normalizedAddress) {
-          wallet.delete(key);
-          return true;
-        }
-      }
-    }
-    return false;
+    const initialLength = this.#wallets.length;
+    this.#wallets = this.#wallets.filter((wallet: JsonWallet) => {
+      const [publicKey] = wallet;
+      const walletAddress = stripHexPrefix(this.#publicKeyToAddress(publicKey));
+      return normalizedAddress !== walletAddress;
+    });
+    return this.#wallets.length < initialLength;
   }
 }
 
-SnapKeyring.type = type;
+JsonKeyring.type = type;
 
-export default SnapKeyring;
+export default JsonKeyring;

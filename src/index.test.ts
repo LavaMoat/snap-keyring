@@ -1,47 +1,44 @@
-import SnapKeyring, { SnapKey } from ".";
+import JsonKeyring from ".";
+import { Json } from "@metamask/utils";
 
-const mockSnapId = "local:http://localhost:8080";
-const mockSnapOrigin = "localhost:8080";
-const mockSnapKey = [mockSnapId, mockSnapOrigin] as SnapKey;
-const missingSnapKey = ["local:http://mock.test", "mock.test"] as SnapKey;
 const mockAddress = "0x77ac616693b24c0c49cb148dbcb3fac8ccf0c96c";
 const mockPrivateData = {
   mockPrivateData: "foo",
 };
-
-const mockWallets = {
-  "local:http://localhost:8080 localhost:8080": {
-    deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef:
-      mockPrivateData,
-  },
-};
+const mockWallets: [string, Json][] = [
+  [
+    "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    mockPrivateData,
+  ],
+];
 
 test("Should manage wallets", async () => {
-  const keyring = new SnapKeyring();
+  const keyring = new JsonKeyring();
+
+  const noAccounts = keyring.getAccounts();
+  expect(noAccounts).toEqual([]);
+
   await keyring.deserialize(mockWallets);
 
   const serialized = await keyring.serialize();
   expect(serialized).toEqual(mockWallets);
 
-  const noAccounts = keyring.getAccounts(missingSnapKey);
-  expect(noAccounts).toEqual([]);
-
-  const accounts = keyring.getAccounts(mockSnapKey);
+  const accounts = keyring.getAccounts();
   expect(accounts).toEqual([mockAddress]);
 
-  const privateData = keyring.exportAccount(mockSnapKey, mockAddress);
+  const [,privateData] = keyring.exportAccount(mockAddress);
   expect(privateData).toEqual(mockPrivateData);
 
-  const missingData = keyring.exportAccount(mockSnapKey, "0xff");
-  expect(missingData).toBeNull();
+  const missingData = keyring.exportAccount("0xff");
+  expect(missingData).toBeUndefined();
 
-  const removed = keyring.removeAccount(mockSnapKey, mockAddress);
+  const removed = keyring.removeAccount(mockAddress);
   expect(removed).toEqual(true);
 
-  const emptyAccounts = keyring.getAccounts(mockSnapKey);
+  const emptyAccounts = keyring.getAccounts();
   expect(emptyAccounts).toEqual([]);
 
-  const removedEmpty = keyring.removeAccount(mockSnapKey, mockAddress);
+  const removedEmpty = keyring.removeAccount(mockAddress);
   expect(removedEmpty).toEqual(false);
 
   try {

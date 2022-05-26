@@ -1,7 +1,7 @@
 {
-  "name": "@metamask/snap-keyring",
+  "name": "@metamask/json-keyring",
   "version": "1.0.0",
-  "description": "Keyring for snaps",
+  "description": "Keyring for arbitrary JSON data",
   "module": "dist/index.esm.js",
   "main": "dist/index.js",
   "scripts": {
