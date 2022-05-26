@@ -1,3 +1,3 @@
-# Snap Keyring
+# JSON Keyring
 
-Keyring implemtentation for snaps.
+Keyring implementation for arbitrary JSON data.
