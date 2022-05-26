@@ -16,10 +16,7 @@ export type Address = string;
 export type PublicKey = Buffer; // 33 or 64 byte public key
 export type JsonWallet = [PublicKey, Json];
 
-// Serialized format.
-//
-// The key tuple is joined separated by a single space and the
-// public key for each account is encoded as a hex string.
+// Type for serialized format.
 type JsonWallets = [string, Json][];
 
 class JsonKeyring {
@@ -65,7 +62,7 @@ class JsonKeyring {
   }
 
   /**
-   *  Get an array of addresses.
+   *  Get an array of public addresses.
    */
   getAccounts(): Address[] {
     return this.#wallets.map((wallet: JsonWallet) => {
