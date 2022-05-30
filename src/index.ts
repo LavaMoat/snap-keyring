@@ -10,7 +10,7 @@ import { Json } from "@metamask/utils";
 import { publicToAddress, stripHexPrefix } from "ethereumjs-util";
 import { normalize } from "@metamask/eth-sig-util";
 
-export const type = "Json Keyring";
+export const type = "Snap Keyring";
 
 export type Address = string;
 export type PublicKey = Buffer; // 33 or 64 byte public key
@@ -19,7 +19,7 @@ export type JsonWallet = [PublicKey, Json];
 // Type for serialized format.
 type JsonWallets = [string, Json][];
 
-class JsonKeyring {
+class SnapKeyring {
   static type: string;
 
   type: string;
@@ -114,6 +114,6 @@ class JsonKeyring {
   }
 }
 
-JsonKeyring.type = type;
+SnapKeyring.type = type;
 
-export default JsonKeyring;
+export default SnapKeyring;

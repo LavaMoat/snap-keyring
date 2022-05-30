@@ -1,5 +1,5 @@
 {
-  "name": "@metamask/json-keyring",
+  "name": "@lavamoat/snap-keyring",
   "version": "1.0.0",
   "description": "Keyring for arbitrary JSON data",
   "module": "dist/index.esm.js",

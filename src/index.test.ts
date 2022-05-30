@@ -1,4 +1,4 @@
-import JsonKeyring from ".";
+import SnapKeyring from ".";
 import { Json } from "@metamask/utils";
 
 const mockAddress = "0x77ac616693b24c0c49cb148dbcb3fac8ccf0c96c";
@@ -13,7 +13,7 @@ const mockWallets: [string, Json][] = [
 ];
 
 test("Should manage wallets", async () => {
-  const keyring = new JsonKeyring();
+  const keyring = new SnapKeyring();
 
   const noAccounts = keyring.getAccounts();
   expect(noAccounts).toEqual([]);
