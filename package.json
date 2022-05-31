@@ -4,6 +4,9 @@
   "description": "Keyring for arbitrary JSON data",
   "module": "dist/index.esm.js",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "setup": "yarn install && yarn allow-scripts",
     "test": "jest",
