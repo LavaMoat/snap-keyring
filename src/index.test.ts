@@ -44,12 +44,12 @@ test("Should manage wallets", async () => {
   try {
     await keyring.signMessage();
   } catch (e) {
-    expect(e.message).toMatch("TODO");
+    expect(e.message).toMatch("not supported");
   }
 
   try {
     await keyring.signTransaction();
   } catch (e) {
-    expect(e.message).toMatch("TODO");
+    expect(e.message).toMatch("not supported");
   }
 });

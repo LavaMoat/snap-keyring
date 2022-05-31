@@ -76,7 +76,7 @@ class SnapKeyring {
    */
   async signTransaction(/* address, tx, opts = {} */) {
     // istanbul ignore next
-    throw new Error("TODO: send RPC response to the snap");
+    throw new Error("signTransaction is not supported for the snap keyring");
   }
 
   /**
@@ -84,7 +84,7 @@ class SnapKeyring {
    */
   async signMessage(/* address, data, opts = {} */) {
     // istanbul ignore next
-    throw new Error("TODO: send RPC response to the snap");
+    throw new Error("signMessage is not supported for the snap keyring");
   }
 
   /**
