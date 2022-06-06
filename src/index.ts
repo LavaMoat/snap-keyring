@@ -20,7 +20,7 @@ export type JsonWallet = [PublicKey, Json];
 type JsonWallets = [string, Json][];
 
 class SnapKeyring {
-  static type: string;
+  // static type;
 
   type: string;
   _wallets: JsonWallet[];
@@ -114,6 +114,7 @@ class SnapKeyring {
   }
 }
 
+// @ts-ignore: can't declare static `type` field with the MM build system
 SnapKeyring.type = type;
 
 export default SnapKeyring;

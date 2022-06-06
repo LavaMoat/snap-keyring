@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "declaration": true,
     "emitDeclarationOnly": true,
+    "esModuleInterop": true,
     "noImplicitAny": true,
     "module": "esnext",
     "target": "esnext",

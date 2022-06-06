@@ -1,4 +1,3 @@
-
 {
   "include": ["src/**/*.ts"],
   "compilerOptions": {
@@ -7,6 +6,7 @@
     "declaration": true,
     "noImplicitAny": true,
     "module": "CommonJS",
+    "esModuleInterop": true,
     "target": "esnext",
     "lib": ["esnext", "dom"],
     "allowJs": true,
