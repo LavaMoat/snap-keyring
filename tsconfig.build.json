@@ -7,7 +7,7 @@
     "noImplicitAny": true,
     "module": "CommonJS",
     "esModuleInterop": true,
-    "target": "esnext",
+    "target": "ES2020",
     "lib": ["esnext", "dom"],
     "allowJs": true,
     "skipLibCheck": true,

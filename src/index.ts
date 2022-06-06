@@ -20,13 +20,15 @@ export type JsonWallet = [PublicKey, Json];
 type JsonWallets = [string, Json][];
 
 class SnapKeyring {
+  // MM build system cannot accept static or other class members
   // static type;
-
-  type: string;
-  _wallets: JsonWallet[];
+  //type: string;
+  //_wallets: JsonWallet[];
 
   constructor() {
+    // @ts-ignore
     this.type = type;
+    // @ts-ignore
     this._wallets = [];
   }
 
@@ -42,6 +44,7 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async serialize(): Promise<JsonWallets> {
+    // @ts-ignore
     return this._wallets.map((wallet: JsonWallet) => {
       const [publicKey, privateValue] = wallet;
       return [publicKey.toString("hex"), privateValue];
@@ -55,6 +58,7 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async deserialize(wallets: JsonWallets): Promise<void> {
+    // @ts-ignore
     this._wallets = wallets.map((value: [string, Json]) => {
       const [publicKey, privateValue] = value;
       return [Buffer.from(publicKey, "hex"), privateValue];
@@ -65,6 +69,7 @@ class SnapKeyring {
    *  Get an array of public addresses.
    */
   getAccounts(): Address[] {
+    // @ts-ignore
     return this._wallets.map((wallet: JsonWallet) => {
       const [publicKey] = wallet;
       return this._publicKeyToAddress(publicKey);
@@ -92,6 +97,7 @@ class SnapKeyring {
    */
   exportAccount(address: Address): [PublicKey, Json] | undefined {
     const normalizedAddress = stripHexPrefix(address);
+    // @ts-ignore
     return this._wallets.find((wallet: JsonWallet) => {
       const [publicKey] = wallet;
       const walletAddress = stripHexPrefix(this._publicKeyToAddress(publicKey));
@@ -104,12 +110,15 @@ class SnapKeyring {
    */
   removeAccount(address: Address): boolean {
     const normalizedAddress = stripHexPrefix(address);
+    // @ts-ignore
     const initialLength = this._wallets.length;
+    // @ts-ignore
     this._wallets = this._wallets.filter((wallet: JsonWallet) => {
       const [publicKey] = wallet;
       const walletAddress = stripHexPrefix(this._publicKeyToAddress(publicKey));
       return normalizedAddress !== walletAddress;
     });
+    // @ts-ignore
     return this._wallets.length < initialLength;
   }
 }
