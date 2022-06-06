@@ -1,6 +1,6 @@
 {
   "name": "snap-keyring",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Keyring for arbitrary JSON data",
   "module": "dist/index.esm.js",
   "main": "dist/index.js",
@@ -9,11 +9,12 @@
   ],
   "scripts": {
     "setup": "yarn install && yarn allow-scripts",
-    "test": "jest",
+    "test": "yarn build:dev && jest",
     "clean": "rm -rf ./dist",
     "lint": "eslint src --cache --ext js,ts",
     "fmt": "prettier --write . --no-color",
-    "build": "yarn types && node build.js",
+    "build:dev": "node build.js",
+    "build:tsc": "tsc --project tsconfig.build.json",
     "types": "tsc --project tsconfig.json"
   },
   "dependencies": {

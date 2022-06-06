@@ -1,0 +1,19 @@
+
+{
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "noImplicitAny": true,
+    "module": "CommonJS",
+    "target": "esnext",
+    "lib": ["esnext", "dom"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "downlevelIteration": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node"
+  },
+  "exclude": ["node_modules"]
+}
