@@ -23,14 +23,14 @@ class SnapKeyring {
   static type: string;
 
   type: string;
-  #wallets: JsonWallet[];
+  _wallets: JsonWallet[];
 
   constructor() {
     this.type = type;
-    this.#wallets = [];
+    this._wallets = [];
   }
 
-  #publicKeyToAddress(publicKey: PublicKey): Address {
+  _publicKeyToAddress(publicKey: PublicKey): Address {
     return normalize(publicToAddress(publicKey).toString("hex"));
   }
 
@@ -42,7 +42,7 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async serialize(): Promise<JsonWallets> {
-    return this.#wallets.map((wallet: JsonWallet) => {
+    return this._wallets.map((wallet: JsonWallet) => {
       const [publicKey, privateValue] = wallet;
       return [publicKey.toString("hex"), privateValue];
     });
@@ -55,7 +55,7 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async deserialize(wallets: JsonWallets): Promise<void> {
-    this.#wallets = wallets.map((value: [string, Json]) => {
+    this._wallets = wallets.map((value: [string, Json]) => {
       const [publicKey, privateValue] = value;
       return [Buffer.from(publicKey, "hex"), privateValue];
     });
@@ -65,9 +65,9 @@ class SnapKeyring {
    *  Get an array of public addresses.
    */
   getAccounts(): Address[] {
-    return this.#wallets.map((wallet: JsonWallet) => {
+    return this._wallets.map((wallet: JsonWallet) => {
       const [publicKey] = wallet;
-      return this.#publicKeyToAddress(publicKey);
+      return this._publicKeyToAddress(publicKey);
     });
   }
 
@@ -92,9 +92,9 @@ class SnapKeyring {
    */
   exportAccount(address: Address): [PublicKey, Json] | undefined {
     const normalizedAddress = stripHexPrefix(address);
-    return this.#wallets.find((wallet: JsonWallet) => {
+    return this._wallets.find((wallet: JsonWallet) => {
       const [publicKey] = wallet;
-      const walletAddress = stripHexPrefix(this.#publicKeyToAddress(publicKey));
+      const walletAddress = stripHexPrefix(this._publicKeyToAddress(publicKey));
       return normalizedAddress === walletAddress;
     });
   }
@@ -104,13 +104,13 @@ class SnapKeyring {
    */
   removeAccount(address: Address): boolean {
     const normalizedAddress = stripHexPrefix(address);
-    const initialLength = this.#wallets.length;
-    this.#wallets = this.#wallets.filter((wallet: JsonWallet) => {
+    const initialLength = this._wallets.length;
+    this._wallets = this._wallets.filter((wallet: JsonWallet) => {
       const [publicKey] = wallet;
-      const walletAddress = stripHexPrefix(this.#publicKeyToAddress(publicKey));
+      const walletAddress = stripHexPrefix(this._publicKeyToAddress(publicKey));
       return normalizedAddress !== walletAddress;
     });
-    return this.#wallets.length < initialLength;
+    return this._wallets.length < initialLength;
   }
 }
 
