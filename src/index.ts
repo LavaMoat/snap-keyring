@@ -68,7 +68,7 @@ class SnapKeyring {
   /**
    *  Get an array of public addresses.
    */
-  getAccounts(): Address[] {
+  async getAccounts(): Promise<Address[]> {
     // @ts-ignore
     return this._wallets.map((wallet: JsonWallet) => {
       const [publicKey] = wallet;
