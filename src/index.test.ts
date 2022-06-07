@@ -13,9 +13,10 @@ const mockWallets: [string, Json][] = [
 ];
 
 test("Should manage wallets", async () => {
+
   const keyring = new SnapKeyring();
 
-  const noAccounts = keyring.getAccounts();
+  const noAccounts = await keyring.getAccounts();
   expect(noAccounts).toEqual([]);
 
   await keyring.deserialize(mockWallets);
@@ -23,7 +24,7 @@ test("Should manage wallets", async () => {
   const serialized = await keyring.serialize();
   expect(serialized).toEqual(mockWallets);
 
-  const accounts = keyring.getAccounts();
+  const accounts = await keyring.getAccounts();
   expect(accounts).toEqual([mockAddress]);
 
   const [,privateData] = keyring.exportAccount(mockAddress);
@@ -35,11 +36,19 @@ test("Should manage wallets", async () => {
   const removed = keyring.removeAccount(mockAddress);
   expect(removed).toEqual(true);
 
-  const emptyAccounts = keyring.getAccounts();
+  const emptyAccounts = await keyring.getAccounts();
   expect(emptyAccounts).toEqual([]);
 
   const removedEmpty = keyring.removeAccount(mockAddress);
   expect(removedEmpty).toEqual(false);
+
+  const publicKey = Buffer.from(mockWallets[0][0], "hex")
+  const added = keyring.addAccount(publicKey, { secret: "super secret" });
+  expect(added).toEqual(true);
+
+  const duplicateAdded = keyring.addAccount(
+    publicKey, { secret: "super secret" });
+  expect(duplicateAdded).toEqual(false);
 
   try {
     await keyring.signMessage();

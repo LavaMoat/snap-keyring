@@ -76,6 +76,18 @@ class SnapKeyring {
     });
   }
 
+  addAccount(publicKey: PublicKey, value: Json): boolean {
+    const key = this._publicKeyToAddress(publicKey);
+    // @ts-ignore
+    const exists = this._wallets.find((v) => v[0] === key);
+    if (!exists) {
+      // @ts-ignore
+      this._wallets.push([key, value]);
+      return true;
+    }
+    return false;
+  }
+
   /**
    *  Sign a transaction.
    */

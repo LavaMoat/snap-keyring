@@ -1,6 +1,6 @@
 {
   "name": "snap-keyring",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Keyring for arbitrary JSON data",
   "module": "dist/index.esm.js",
   "main": "dist/index.js",
@@ -14,7 +14,8 @@
     "lint": "eslint src --cache --ext js,ts",
     "fmt": "prettier --write . --no-color",
     "dist": "yarn clean && yarn build:tsc",
-    "build:dev": "node build.js",
+    "prepublish": "yarn dist",
+    "build:dev": "yarn clean && node build.js",
     "build:tsc": "tsc --project tsconfig.build.json",
     "types": "tsc --project tsconfig.json"
   },
