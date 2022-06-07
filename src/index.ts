@@ -7,8 +7,7 @@
  *  Consumers of the API use an Ethereum address to reference accounts.
  */
 import { Json } from "@metamask/utils";
-import { publicToAddress, stripHexPrefix } from "ethereumjs-util";
-import { normalize } from "@metamask/eth-sig-util";
+import { publicToAddress, stripHexPrefix, bufferToHex } from "ethereumjs-util";
 
 export const type = "Snap Keyring";
 
@@ -33,7 +32,7 @@ class SnapKeyring {
   }
 
   _publicKeyToAddress(publicKey: PublicKey): Address {
-    return normalize(publicToAddress(publicKey).toString("hex"));
+    return bufferToHex(publicToAddress(publicKey));
   }
 
   /**

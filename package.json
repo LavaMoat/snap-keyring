@@ -1,6 +1,6 @@
 {
   "name": "snap-keyring",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Keyring for arbitrary JSON data",
   "module": "dist/index.esm.js",
   "main": "dist/index.js",
@@ -20,7 +20,6 @@
     "types": "tsc --project tsconfig.json"
   },
   "dependencies": {
-    "@metamask/eth-sig-util": "^4.0.1",
     "@metamask/utils": "^2.0.0",
     "ethereumjs-util": "^7.1.4"
   },
