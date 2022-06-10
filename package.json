@@ -1,8 +1,7 @@
 {
   "name": "snap-keyring",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Keyring for arbitrary JSON data",
-  "module": "dist/index.esm.js",
   "main": "dist/index.js",
   "files": [
     "dist"

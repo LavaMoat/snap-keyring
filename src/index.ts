@@ -3,8 +3,6 @@
  *
  *  Each account requires a public key (64 byte or 33 byte SEC-1 encoded)
  *  and some arbitrary private data that must be serializable to JSON.
- *
- *  Consumers of the API use an Ethereum address to reference accounts.
  */
 import { Json } from "@metamask/utils";
 import { publicToAddress, stripHexPrefix, bufferToHex } from "ethereumjs-util";
@@ -20,14 +18,12 @@ type JsonWallets = [string, Json][];
 
 class SnapKeyring {
   // MM build system cannot accept static or other class members
-  // static type;
-  //type: string;
-  //_wallets: JsonWallet[];
+  static type: string;
+  type: string;
+  _wallets: JsonWallet[];
 
   constructor() {
-    // @ts-ignore
     this.type = type;
-    // @ts-ignore
     this._wallets = [];
   }
 
@@ -43,7 +39,6 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async serialize(): Promise<JsonWallets> {
-    // @ts-ignore
     return this._wallets.map((wallet: JsonWallet) => {
       const [publicKey, privateValue] = wallet;
       return [publicKey.toString("hex"), privateValue];
@@ -57,7 +52,6 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async deserialize(wallets: JsonWallets): Promise<void> {
-    // @ts-ignore
     this._wallets = wallets.map((value: [string, Json]) => {
       const [publicKey, privateValue] = value;
       return [Buffer.from(publicKey, "hex"), privateValue];
@@ -68,18 +62,16 @@ class SnapKeyring {
    *  Get an array of public addresses.
    */
   async getAccounts(): Promise<Address[]> {
-    // @ts-ignore
     return this._wallets.map((wallet: JsonWallet) => {
       const [publicKey] = wallet;
       return this._publicKeyToAddress(publicKey);
     });
   }
 
+  // Called by the snap to create an account.
   addAccount(publicKey: PublicKey, value: Json): boolean {
-    // @ts-ignore
     const exists = this._wallets.find((v) => v[0] === publicKey);
     if (!exists) {
-      // @ts-ignore
       this._wallets.push([publicKey, value]);
       return true;
     }
@@ -107,7 +99,6 @@ class SnapKeyring {
    */
   exportAccount(address: Address): [PublicKey, Json] | undefined {
     const normalizedAddress = stripHexPrefix(address);
-    // @ts-ignore
     return this._wallets.find((wallet: JsonWallet) => {
       const [publicKey] = wallet;
       const walletAddress = stripHexPrefix(this._publicKeyToAddress(publicKey));
@@ -120,20 +111,16 @@ class SnapKeyring {
    */
   removeAccount(address: Address): boolean {
     const normalizedAddress = stripHexPrefix(address);
-    // @ts-ignore
     const initialLength = this._wallets.length;
-    // @ts-ignore
     this._wallets = this._wallets.filter((wallet: JsonWallet) => {
       const [publicKey] = wallet;
       const walletAddress = stripHexPrefix(this._publicKeyToAddress(publicKey));
       return normalizedAddress !== walletAddress;
     });
-    // @ts-ignore
     return this._wallets.length < initialLength;
   }
 }
 
-// @ts-ignore: can't declare static `type` field with the MM build system
 SnapKeyring.type = type;
 
 export default SnapKeyring;
