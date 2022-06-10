@@ -14,7 +14,7 @@ export type PublicKey = Buffer; // 33 or 64 byte public key
 export type JsonWallet = [PublicKey, Json];
 
 // Type for serialized format.
-type JsonWallets = [string, Json][];
+type SerializedWallets = [string, Json][];
 
 class SnapKeyring {
   // MM build system cannot accept static or other class members
@@ -38,7 +38,7 @@ class SnapKeyring {
    *  This function is synchronous but uses an async signature
    *  for consistency with other keyring implementations.
    */
-  async serialize(): Promise<JsonWallets> {
+  async serialize(): Promise<SerializedWallets> {
     return this._wallets.map((wallet: JsonWallet) => {
       const [publicKey, privateValue] = wallet;
       return [publicKey.toString("hex"), privateValue];
@@ -51,7 +51,7 @@ class SnapKeyring {
    *  This function is synchronous but uses an async signature
    *  for consistency with other keyring implementations.
    */
-  async deserialize(wallets: JsonWallets): Promise<void> {
+  async deserialize(wallets: SerializedWallets): Promise<void> {
     this._wallets = wallets.map((value: [string, Json]) => {
       const [publicKey, privateValue] = value;
       return [Buffer.from(publicKey, "hex"), privateValue];
