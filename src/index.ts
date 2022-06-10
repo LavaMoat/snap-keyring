@@ -162,6 +162,16 @@ class SnapKeyring {
     return false;
   }
 
+  /* SNAP RPC METHODS */
+
+  /**
+   *  List the accounts for a snap origin.
+   */
+  listAccounts(origin: Origin): PublicKey[] {
+    const accounts = this._wallets.get(origin) || [];
+    return accounts.map((v) => v[0]);
+  }
+
   /**
    *  Create an account for a snap origin.
    *
@@ -173,22 +183,22 @@ class SnapKeyring {
    *  for duplicates across all addresses.
    */
   createAccount(origin: Origin, publicKey: PublicKey, value: Json): boolean {
-    const wallets = this._wallets.get(origin) || [];
-    const exists = wallets.find((v) => v[0] === publicKey);
+    const accounts = this._wallets.get(origin) || [];
+    const exists = accounts.find((v) => v[0] === publicKey);
     if (!exists) {
-      wallets.push([publicKey, value]);
-      this._wallets.set(origin, wallets);
+      accounts.push([publicKey, value]);
+      this._wallets.set(origin, accounts);
       return true;
     }
     return false;
   }
 
   /**
-   *  Read the private data associated with an account for a snap origin.
+   *  Read the private data for an account belonging to a snap origin.
    */
   readAccount(origin: Origin, publicKey: PublicKey): Json | undefined {
-    const wallets = this._wallets.get(origin) || [];
-    const value = wallets.find((v) => v[0] === publicKey);
+    const accounts = this._wallets.get(origin) || [];
+    const value = accounts.find((v) => v[0] === publicKey);
     if (value) {
       const [, privateData] = value;
       return privateData;
@@ -196,13 +206,31 @@ class SnapKeyring {
   }
 
   /**
-   *  Delete an account for a snap origin.
+   *  Update the private data for the account belonging to the snap origin.
+   *
+   *  The account must already exist.
+   */
+  updateAccount(origin: Origin, publicKey: PublicKey, value: Json): boolean {
+    const accounts = this._wallets.get(origin) || [];
+    const exists = accounts.find((v) => v[0] === publicKey);
+    if (exists) {
+      exists[1] = value;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   *  Delete the private data for an account belonging to a snap origin.
    */
   deleteAccount(origin: Origin, publicKey: PublicKey): boolean {
-    const wallets = this._wallets.get(origin) || [];
-    const index = wallets.findIndex((v) => v[0] === publicKey);
+    const accounts = this._wallets.get(origin) || [];
+    const index = accounts.findIndex((v) => v[0] === publicKey);
     if (index > -1) {
-      wallets.splice(index, 1);
+      accounts.splice(index, 1);
+      if (accounts.length === 0) {
+        this._wallets.delete(origin);
+      }
       return true;
     }
     return false;

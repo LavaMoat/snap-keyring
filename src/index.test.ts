@@ -1,5 +1,10 @@
 import SnapKeyring, { SerializedWallets } from ".";
 
+const missingPublicKey = Buffer.from(
+  "00adbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+  "hex"
+);
+
 const mockSnapOrigin = "https://mock-snap.example.com";
 const mockAddress = "0x77ac616693b24c0c49cb148dbcb3fac8ccf0c96c";
 const mockPrivateData = {
@@ -14,8 +19,18 @@ const mockWallets: SerializedWallets = {
   ],
 };
 
+const publicKey = Buffer.from(mockWallets[mockSnapOrigin][0][0], "hex");
+
 test("Should manage wallets", async () => {
   const keyring = new SnapKeyring();
+
+  // Trigger some code paths for non-existent
+  // snap origin for coverage
+  keyring.listAccounts(mockSnapOrigin);
+  keyring.readAccount(mockSnapOrigin, publicKey);
+  keyring.updateAccount(mockSnapOrigin, publicKey, null);
+  keyring.createAccount(mockSnapOrigin, publicKey, null);
+  keyring.deleteAccount(mockSnapOrigin, publicKey);
 
   const noAccounts = await keyring.getAccounts();
   expect(noAccounts).toEqual([]);
@@ -44,13 +59,15 @@ test("Should manage wallets", async () => {
   expect(removedEmpty).toEqual(false);
 
   const mockSnapPrivateData = { secret: "super secret" };
-  const publicKey = Buffer.from(mockWallets[mockSnapOrigin][0][0], "hex");
   const added = keyring.createAccount(
     mockSnapOrigin,
     publicKey,
     mockSnapPrivateData
   );
   expect(added).toEqual(true);
+
+  const accountPublicKeys = keyring.listAccounts(mockSnapOrigin);
+  expect(accountPublicKeys).toEqual([publicKey]);
 
   const duplicateAdded = keyring.createAccount(mockSnapOrigin, publicKey, {
     secret: "super secret",
@@ -59,6 +76,21 @@ test("Should manage wallets", async () => {
 
   const readPrivateData = keyring.readAccount(mockSnapOrigin, publicKey);
   expect(readPrivateData).toEqual(mockSnapPrivateData);
+
+  const mockUpdatedData = { secret: "new value" };
+  const updatedPrivateData = keyring.updateAccount(
+    mockSnapOrigin,
+    publicKey,
+    mockUpdatedData
+  );
+  expect(updatedPrivateData).toEqual(true);
+
+  const missingUpdatedPrivateData = keyring.updateAccount(
+    mockSnapOrigin,
+    missingPublicKey,
+    mockUpdatedData
+  );
+  expect(missingUpdatedPrivateData).toEqual(false);
 
   const deletedAccount = keyring.deleteAccount(mockSnapOrigin, publicKey);
   expect(deletedAccount).toEqual(true);
