@@ -9,22 +9,25 @@ import { publicToAddress, stripHexPrefix, bufferToHex } from "ethereumjs-util";
 
 export const type = "Snap Keyring";
 
-export type Address = string;
+export type Origin = string; // Origin of the snap
+export type Address = string; // String public address
 export type PublicKey = Buffer; // 33 or 64 byte public key
 export type JsonWallet = [PublicKey, Json];
+export type SnapWallet = Map<Origin, JsonWallet[]>;
 
 // Type for serialized format.
-type SerializedWallets = [string, Json][];
+export type SerializedWallets = {
+  [key: string]: [string, Json][];
+};
 
 class SnapKeyring {
-  // MM build system cannot accept static or other class members
   static type: string;
   type: string;
-  _wallets: JsonWallet[];
+  _wallets: SnapWallet;
 
   constructor() {
     this.type = type;
-    this._wallets = [];
+    this._wallets = new Map();
   }
 
   _publicKeyToAddress(publicKey: PublicKey): Address {
@@ -39,10 +42,14 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async serialize(): Promise<SerializedWallets> {
-    return this._wallets.map((wallet: JsonWallet) => {
-      const [publicKey, privateValue] = wallet;
-      return [publicKey.toString("hex"), privateValue];
-    });
+    const output: SerializedWallets = {};
+    for (const [origin, accounts] of this._wallets.entries()) {
+      output[origin] = accounts.map((wallet: JsonWallet) => {
+        const [publicKey, privateValue] = wallet;
+        return [publicKey.toString("hex"), privateValue];
+      });
+    }
+    return output;
   }
 
   /**
@@ -52,27 +59,46 @@ class SnapKeyring {
    *  for consistency with other keyring implementations.
    */
   async deserialize(wallets: SerializedWallets): Promise<void> {
-    this._wallets = wallets.map((value: [string, Json]) => {
-      const [publicKey, privateValue] = value;
-      return [Buffer.from(publicKey, "hex"), privateValue];
-    });
+    for (const [key, accounts] of Object.entries(wallets)) {
+      this._wallets.set(
+        key,
+        accounts.map((value: [string, Json]) => {
+          const [publicKey, privateValue] = value;
+          return [Buffer.from(publicKey, "hex"), privateValue];
+        })
+      );
+    }
   }
 
   /**
    *  Get an array of public addresses.
    */
   async getAccounts(): Promise<Address[]> {
-    return this._wallets.map((wallet: JsonWallet) => {
-      const [publicKey] = wallet;
-      return this._publicKeyToAddress(publicKey);
-    });
+    let addresses: Address[] = [];
+    for (const [, wallets] of this._wallets.entries()) {
+      addresses = addresses.concat(
+        wallets.map((value: JsonWallet) => {
+          const [publicKey] = value;
+          return this._publicKeyToAddress(publicKey);
+        })
+      );
+    }
+    return addresses;
   }
 
-  // Called by the snap to create an account.
-  addAccount(publicKey: PublicKey, value: Json): boolean {
-    const exists = this._wallets.find((v) => v[0] === publicKey);
+  /**
+   *  Add an account for a snap.
+   *
+   *  This checks for duplicates in the context of the snap origin but
+   *  not across all snaps. The keyring controller is responsible for checking
+   *  for duplicates across all addresses.
+   */
+  addAccount(origin: Origin, publicKey: PublicKey, value: Json): boolean {
+    const wallets = this._wallets.get(origin) || [];
+    const exists = wallets.find((v) => v[0] === publicKey);
     if (!exists) {
-      this._wallets.push([publicKey, value]);
+      wallets.push([publicKey, value]);
+      this._wallets.set(origin, wallets);
       return true;
     }
     return false;
@@ -95,29 +121,50 @@ class SnapKeyring {
   }
 
   /**
-   *  Gets the private data associated with the public key.
+   *  Gets the private data associated with the given address so
+   *  that it may be exported.
+   *
+   *  If this keyring contains duplicate public keys the first
+   *  matching address is exported.
+   *
+   *  Used by the UI to export an account.
    */
   exportAccount(address: Address): [PublicKey, Json] | undefined {
     const normalizedAddress = stripHexPrefix(address);
-    return this._wallets.find((wallet: JsonWallet) => {
-      const [publicKey] = wallet;
-      const walletAddress = stripHexPrefix(this._publicKeyToAddress(publicKey));
-      return normalizedAddress === walletAddress;
-    });
+    for (const [, accounts] of this._wallets.entries()) {
+      const matchedAccount = accounts.find((wallet: JsonWallet) => {
+        const [publicKey] = wallet;
+        const walletAddress = stripHexPrefix(
+          this._publicKeyToAddress(publicKey)
+        );
+        return normalizedAddress === walletAddress;
+      });
+      if (matchedAccount) {
+        return matchedAccount;
+      }
+    }
   }
 
   /**
-   *  Remove an account for the given public address.
+   *  Removes the first account matching the given public address.
    */
   removeAccount(address: Address): boolean {
     const normalizedAddress = stripHexPrefix(address);
-    const initialLength = this._wallets.length;
-    this._wallets = this._wallets.filter((wallet: JsonWallet) => {
-      const [publicKey] = wallet;
-      const walletAddress = stripHexPrefix(this._publicKeyToAddress(publicKey));
-      return normalizedAddress !== walletAddress;
-    });
-    return this._wallets.length < initialLength;
+    for (const [origin, accounts] of this._wallets.entries()) {
+      const filtered = accounts.filter((wallet: JsonWallet) => {
+        const [publicKey] = wallet;
+        const walletAddress = stripHexPrefix(
+          this._publicKeyToAddress(publicKey)
+        );
+        return normalizedAddress !== walletAddress;
+      });
+
+      if (filtered.length !== accounts.length) {
+        this._wallets.set(origin, filtered);
+        return true;
+      }
+    }
+    return false;
   }
 }
 

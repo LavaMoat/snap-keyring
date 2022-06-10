@@ -1,19 +1,21 @@
-import SnapKeyring from ".";
+import SnapKeyring, { SerializedWallets } from ".";
 import { Json } from "@metamask/utils";
 
+const mockSnapOrigin = "https://mock-snap.example.com";
 const mockAddress = "0x77ac616693b24c0c49cb148dbcb3fac8ccf0c96c";
 const mockPrivateData = {
   mockPrivateData: "foo",
 };
-const mockWallets: [string, Json][] = [
-  [
-    "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
-    mockPrivateData,
-  ],
-];
+const mockWallets: SerializedWallets = {
+  [mockSnapOrigin]: [
+    [
+      "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+      mockPrivateData,
+    ],
+  ]
+};
 
 test("Should manage wallets", async () => {
-
   const keyring = new SnapKeyring();
 
   const noAccounts = await keyring.getAccounts();
@@ -27,7 +29,7 @@ test("Should manage wallets", async () => {
   const accounts = await keyring.getAccounts();
   expect(accounts).toEqual([mockAddress]);
 
-  const [,privateData] = keyring.exportAccount(mockAddress);
+  const [, privateData] = keyring.exportAccount(mockAddress);
   expect(privateData).toEqual(mockPrivateData);
 
   const missingData = keyring.exportAccount("0xff");
@@ -42,12 +44,13 @@ test("Should manage wallets", async () => {
   const removedEmpty = keyring.removeAccount(mockAddress);
   expect(removedEmpty).toEqual(false);
 
-  const publicKey = Buffer.from(mockWallets[0][0], "hex")
-  const added = keyring.addAccount(publicKey, { secret: "super secret" });
+  const publicKey = Buffer.from(mockWallets[mockSnapOrigin][0][0], "hex");
+  const added = keyring.addAccount(mockSnapOrigin, publicKey, { secret: "super secret" });
   expect(added).toEqual(true);
 
-  const duplicateAdded = keyring.addAccount(
-    publicKey, { secret: "super secret" });
+  const duplicateAdded = keyring.addAccount(mockSnapOrigin, publicKey, {
+    secret: "super secret",
+  });
   expect(duplicateAdded).toEqual(false);
 
   try {
