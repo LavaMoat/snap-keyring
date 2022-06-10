@@ -33,6 +33,11 @@ export type SerializedWallets = {
   [key: string]: [string, Json][];
 };
 
+function arrayEquals(a: Uint8Array, b: Uint8Array) {
+    return a.length === b.length &&
+        a.every((val, index) => val === b[index]);
+}
+
 class SnapKeyring {
   static type: string;
   type: string;
@@ -184,7 +189,7 @@ class SnapKeyring {
    */
   createAccount(origin: Origin, publicKey: PublicKey, value: Json): boolean {
     const accounts = this._wallets.get(origin) || [];
-    const exists = accounts.find((v) => v[0] === publicKey);
+    const exists = accounts.find((v) => arrayEquals(v[0], publicKey));
     if (!exists) {
       accounts.push([publicKey, value]);
       this._wallets.set(origin, accounts);
@@ -198,7 +203,7 @@ class SnapKeyring {
    */
   readAccount(origin: Origin, publicKey: PublicKey): Json {
     const accounts = this._wallets.get(origin) || [];
-    const value = accounts.find((v) => v[0] === publicKey);
+    const value = accounts.find((v) => arrayEquals(v[0], publicKey));
     if (value) {
       const [, privateData] = value;
       return privateData;
@@ -213,7 +218,7 @@ class SnapKeyring {
    */
   updateAccount(origin: Origin, publicKey: PublicKey, value: Json): boolean {
     const accounts = this._wallets.get(origin) || [];
-    const exists = accounts.find((v) => v[0] === publicKey);
+    const exists = accounts.find((v) => arrayEquals(v[0], publicKey));
     if (exists) {
       exists[1] = value;
       return true;
@@ -226,7 +231,7 @@ class SnapKeyring {
    */
   deleteAccount(origin: Origin, publicKey: PublicKey): boolean {
     const accounts = this._wallets.get(origin) || [];
-    const index = accounts.findIndex((v) => v[0] === publicKey);
+    const index = accounts.findIndex((v) => arrayEquals(v[0], publicKey));
     if (index > -1) {
       accounts.splice(index, 1);
       if (accounts.length === 0) {
