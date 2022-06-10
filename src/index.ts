@@ -196,13 +196,14 @@ class SnapKeyring {
   /**
    *  Read the private data for an account belonging to a snap origin.
    */
-  readAccount(origin: Origin, publicKey: PublicKey): Json | undefined {
+  readAccount(origin: Origin, publicKey: PublicKey): Json {
     const accounts = this._wallets.get(origin) || [];
     const value = accounts.find((v) => v[0] === publicKey);
     if (value) {
       const [, privateData] = value;
       return privateData;
     }
+    return null;
   }
 
   /**
