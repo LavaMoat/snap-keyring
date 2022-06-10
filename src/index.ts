@@ -87,24 +87,6 @@ class SnapKeyring {
   }
 
   /**
-   *  Add an account for a snap.
-   *
-   *  This checks for duplicates in the context of the snap origin but
-   *  not across all snaps. The keyring controller is responsible for checking
-   *  for duplicates across all addresses.
-   */
-  addAccount(origin: Origin, publicKey: PublicKey, value: Json): boolean {
-    const wallets = this._wallets.get(origin) || [];
-    const exists = wallets.find((v) => v[0] === publicKey);
-    if (!exists) {
-      wallets.push([publicKey, value]);
-      this._wallets.set(origin, wallets);
-      return true;
-    }
-    return false;
-  }
-
-  /**
    *  Sign a transaction.
    */
   async signTransaction(/* address, tx, opts = {} */) {
@@ -166,6 +148,40 @@ class SnapKeyring {
     }
     return false;
   }
+
+  /**
+   *  Create an account for a snap origin.
+   *
+   *  The account is only created if the public address does not
+   *  already exist.
+   *
+   *  This checks for duplicates in the context of the snap origin but
+   *  not across all snaps. The keyring controller is responsible for checking
+   *  for duplicates across all addresses.
+   */
+  createAccount(origin: Origin, publicKey: PublicKey, value: Json): boolean {
+    const wallets = this._wallets.get(origin) || [];
+    const exists = wallets.find((v) => v[0] === publicKey);
+    if (!exists) {
+      wallets.push([publicKey, value]);
+      this._wallets.set(origin, wallets);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   *  Read an account for a snap origin.
+   */
+  readAccount(origin: Origin, publicKey: PublicKey): Json | undefined {
+    const wallets = this._wallets.get(origin) || [];
+    const value = wallets.find((v) => v[0] === publicKey);
+    if (value) {
+      const [, privateData] = value;
+      return privateData;
+    }
+  }
+
 }
 
 SnapKeyring.type = type;

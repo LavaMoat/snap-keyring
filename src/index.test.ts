@@ -44,14 +44,18 @@ test("Should manage wallets", async () => {
   const removedEmpty = keyring.removeAccount(mockAddress);
   expect(removedEmpty).toEqual(false);
 
+  const mockSnapPrivateData = { secret: "super secret" };
   const publicKey = Buffer.from(mockWallets[mockSnapOrigin][0][0], "hex");
-  const added = keyring.addAccount(mockSnapOrigin, publicKey, { secret: "super secret" });
+  const added = keyring.createAccount(mockSnapOrigin, publicKey, mockSnapPrivateData);
   expect(added).toEqual(true);
 
-  const duplicateAdded = keyring.addAccount(mockSnapOrigin, publicKey, {
+  const duplicateAdded = keyring.createAccount(mockSnapOrigin, publicKey, {
     secret: "super secret",
   });
   expect(duplicateAdded).toEqual(false);
+
+  const readPrivateData = keyring.readAccount(mockSnapOrigin, publicKey);
+  expect(readPrivateData).toEqual(mockSnapPrivateData);
 
   try {
     await keyring.signMessage();
