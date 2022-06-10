@@ -1,5 +1,4 @@
 import SnapKeyring, { SerializedWallets } from ".";
-import { Json } from "@metamask/utils";
 
 const mockSnapOrigin = "https://mock-snap.example.com";
 const mockAddress = "0x77ac616693b24c0c49cb148dbcb3fac8ccf0c96c";
@@ -12,7 +11,7 @@ const mockWallets: SerializedWallets = {
       "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
       mockPrivateData,
     ],
-  ]
+  ],
 };
 
 test("Should manage wallets", async () => {
@@ -46,7 +45,11 @@ test("Should manage wallets", async () => {
 
   const mockSnapPrivateData = { secret: "super secret" };
   const publicKey = Buffer.from(mockWallets[mockSnapOrigin][0][0], "hex");
-  const added = keyring.createAccount(mockSnapOrigin, publicKey, mockSnapPrivateData);
+  const added = keyring.createAccount(
+    mockSnapOrigin,
+    publicKey,
+    mockSnapPrivateData
+  );
   expect(added).toEqual(true);
 
   const duplicateAdded = keyring.createAccount(mockSnapOrigin, publicKey, {
@@ -56,6 +59,12 @@ test("Should manage wallets", async () => {
 
   const readPrivateData = keyring.readAccount(mockSnapOrigin, publicKey);
   expect(readPrivateData).toEqual(mockSnapPrivateData);
+
+  const deletedAccount = keyring.deleteAccount(mockSnapOrigin, publicKey);
+  expect(deletedAccount).toEqual(true);
+
+  const deleteNonExistent = keyring.deleteAccount(mockSnapOrigin, publicKey);
+  expect(deleteNonExistent).toEqual(false);
 
   try {
     await keyring.signMessage();

@@ -1,8 +1,21 @@
 /**
- *  Keyring that stores arbitrary JSON private data.
+ *  Keyring that stores arbitrary JSON private data isolated by snap origin.
  *
  *  Each account requires a public key (64 byte or 33 byte SEC-1 encoded)
  *  and some arbitrary private data that must be serializable to JSON.
+ *
+ *  Some functions defined on this keyring are designed for compatibility
+ *  with existing keyrings and should be called by UI controller code. For
+ *  example: `getAccounts()`, `removeAccount()` and `exportAccount()`; these
+ *  functions accept the public address to identify an account.
+ *
+ *  UI controllers may not have enough information to successfully export and
+ *  restore so `exportAccount()` is defined for compatibility but care should
+ *  be taken exposing this in the UI.
+ *
+ *  Other functions represent basic CRUD operations that snap controllers
+ *  may perform and must specify the `origin` for the snap; `createAccount()`,
+ *  `readAccount()`, `updateAccount()` and `deleteAccount()` for example.
  */
 import { Json } from "@metamask/utils";
 import { publicToAddress, stripHexPrefix, bufferToHex } from "ethereumjs-util";
@@ -171,7 +184,7 @@ class SnapKeyring {
   }
 
   /**
-   *  Read an account for a snap origin.
+   *  Read the private data associated with an account for a snap origin.
    */
   readAccount(origin: Origin, publicKey: PublicKey): Json | undefined {
     const wallets = this._wallets.get(origin) || [];
@@ -182,6 +195,18 @@ class SnapKeyring {
     }
   }
 
+  /**
+   *  Delete an account for a snap origin.
+   */
+  deleteAccount(origin: Origin, publicKey: PublicKey): boolean {
+    const wallets = this._wallets.get(origin) || [];
+    const index = wallets.findIndex((v) => v[0] === publicKey);
+    if (index > -1) {
+      wallets.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
 }
 
 SnapKeyring.type = type;
