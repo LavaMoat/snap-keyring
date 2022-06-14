@@ -1,6 +1,6 @@
 {
   "name": "snap-keyring",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Keyring for arbitrary JSON data",
   "main": "dist/index.js",
   "files": [

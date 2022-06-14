@@ -229,7 +229,7 @@ class SnapKeyring {
   /**
    *  Delete the private data for an account belonging to a snap origin.
    */
-  deleteAccount(origin: Origin, publicKey: PublicKey): boolean {
+  deleteAccount(origin: Origin, publicKey: PublicKey): Address | null {
     const accounts = this._wallets.get(origin) || [];
     const index = accounts.findIndex((v) => arrayEquals(v[0], publicKey));
     if (index > -1) {
@@ -237,9 +237,9 @@ class SnapKeyring {
       if (accounts.length === 0) {
         this._wallets.delete(origin);
       }
-      return true;
+      return this._publicKeyToAddress(publicKey);
     }
-    return false;
+    return null;
   }
 }
 

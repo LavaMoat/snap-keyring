@@ -93,10 +93,10 @@ test("Should manage wallets", async () => {
   expect(missingUpdatedPrivateData).toEqual(false);
 
   const deletedAccount = keyring.deleteAccount(mockSnapOrigin, publicKey);
-  expect(deletedAccount).toEqual(true);
+  expect(deletedAccount).toEqual(mockAddress);
 
   const deleteNonExistent = keyring.deleteAccount(mockSnapOrigin, publicKey);
-  expect(deleteNonExistent).toEqual(false);
+  expect(deleteNonExistent).toEqual(null);
 
   try {
     await keyring.signMessage();
