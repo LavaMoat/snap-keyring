@@ -34,8 +34,7 @@ export type SerializedWallets = {
 };
 
 function arrayEquals(a: Uint8Array, b: Uint8Array) {
-    return a.length === b.length &&
-        a.every((val, index) => val === b[index]);
+  return a.length === b.length && a.every((val, index) => val === b[index]);
 }
 
 class SnapKeyring {
