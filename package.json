@@ -1,6 +1,6 @@
 {
   "name": "snap-keyring",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Keyring for arbitrary JSON data",
   "main": "dist/index.js",
   "files": [
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@metamask/utils": "^2.0.0",
-    "ethereumjs-util": "^7.1.5"
+    "ethereumjs-util": "7.0.10"
   },
   "author": "muji <muji@tmpfs.org>",
   "license": "MIT",
