@@ -1,6 +1,6 @@
 # Snap Keyring
 
-Keyring implementation for arbitrary JSON data designed to be used by MetaMask for managing accounts managed by snaps.
+Keyring implementation for arbitrary JSON data designed to be used by MetaMask for managing accounts isolated by snap origin.
 
 Accounts for each snap are isolated by identifier so callers should ensure that the identifiers are stable and safe to use for isolation purposes.
 
